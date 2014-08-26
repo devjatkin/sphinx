@@ -1,0 +1,7 @@
+indexer
+{
+{% for k,v in sphinx_indexer.iteritems() %}
+  {{ k }} = {{ v }}
+{% endfor %}
+}
+

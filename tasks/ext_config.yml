@@ -1,0 +1,53 @@
+---
+
+- name: Create directory for extended configuration
+  file:
+    path: "{{ sphinx_config_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  with_items:
+    "conf.d"
+
+- name: Create the configuration file searchd.conf
+  template:
+    src: conf.d_searchd.conf.jn2
+    dest: "{{ sphinx_config_dir }}/conf.d/searchd.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create the configuration file indexer.conf
+  template:
+    src: conf.d_indexer.conf.jn2
+    dest: "{{ sphinx_config_dir }}/conf.d/indexer.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create the configuration file sources.conf
+  template:
+    src: conf.d_sources.conf.jn2
+    dest: "{{ sphinx_config_dir }}/conf.d/sources.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create the configuration file indexes.conf
+  template:
+    src: conf.d_indexes.conf.jn2
+    dest: "{{ sphinx_config_dir }}/conf.d/indexes.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create configuration script as sphinx.conf
+  template:
+    src: sphinxsearch.sh.j2
+    dest: "{{ sphinx_config_dir }}/sphinx.conf"
+    owner: root
+    group: root
+    mode: 0755
+  notify:
+    - restart sphinx

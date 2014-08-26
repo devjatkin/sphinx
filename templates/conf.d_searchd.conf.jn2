@@ -1,0 +1,11 @@
+searchd
+{
+{% for a in sphinx_searchd.listen %}
+  listen = {{a}}
+{% endfor %}
+{% for k,v in sphinx_searchd.iteritems() %}
+{% if k != 'listen' %}
+  {{ k }} = {{ v }}
+{% endif %}
+{% endfor %}
+}

@@ -1,0 +1,10 @@
+{% for item in sphinx_indexes %}
+index {{ item.index.name }}
+{
+{% for k,v in item.index.iteritems() %}
+{% if k != 'name' %}
+  {{ k }} = {{ v }}
+{% endif %}
+{% endfor %}
+}
+{% endfor %}

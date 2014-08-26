@@ -1,0 +1,25 @@
+---
+
+sphinx_use_ext_config: True
+sphinx_config_dir: "/etc/sphinxsearch"
+
+sphinx_searchd:
+  listen: ["127.0.0.1:9312", "9306:mysql41"]
+  log: "/var/log/sphinxsearch/searchd.log"
+  query_log: "/var/log/sphinxsearch/query.log"
+  read_timeout: 5
+  max_children: 30
+  pid_file: "/var/run/sphinxsearch/searchd.pid"
+  max_matches: 1000
+  seamless_rotate: 1
+  preopen_indexes: 1
+  unlink_old: 1
+  workers: "threads"
+  binlog_path: "/var/lib/sphinxsearch/data"
+
+sphinx_indexer:
+  mem_limit: "32M"
+
+sphinx_indexes: []
+
+sphinx_sources: []

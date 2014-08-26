@@ -1,0 +1,9 @@
+---
+
+- include: package.yml
+
+- include: config.yml
+
+- include: ext_config.yml
+  when: sphinx_use_ext_config == True
+

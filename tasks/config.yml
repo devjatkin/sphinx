@@ -1,0 +1,19 @@
+---
+
+- name: Update defaults option for sphinx
+  template:
+    src: sphinxsearch.default.jn2
+    dest: /etc/default/sphinxsearch
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "Debian"
+
+- name: Create flat configuration file
+  template:
+    src: sphinx.conf.jn2
+    dest: "{{ sphinx_config_dir }}/sphinx.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: sphinx_use_ext_config == False

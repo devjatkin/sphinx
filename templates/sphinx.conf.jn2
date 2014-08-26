@@ -1,0 +1,4 @@
+{% include "conf.d_sources.conf.jn2" %}
+{% include "conf.d_indexes.conf.jn2" %}
+{% include "conf.d_indexer.conf.jn2" %}
+{% include "conf.d_searchd.conf.jn2" %}

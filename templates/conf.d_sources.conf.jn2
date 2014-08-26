@@ -1,0 +1,10 @@
+{% for item in sphinx_sources %}
+source {{ item.source.name }}
+{
+{% for k,v in item.source.iteritems() %}
+{% if k != 'name' %}
+  {{ k }} = {{ v }}
+{% endif %}
+{% endfor %}
+}
+{% endfor %}

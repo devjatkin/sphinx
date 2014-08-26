@@ -1,0 +1,9 @@
+---
+
+- name: restart sphinx
+  service: name=sphinxsearch state=restarted
+  sudo: yes
+
+- name: reload sphinx
+  service: name=sphinxseearch state=reloaded
+  sudo: yes

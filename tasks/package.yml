@@ -1,0 +1,6 @@
+---
+
+- name: Install the sphinx package
+  apt: name={{ item }} state=present update_cache=yes
+  with_items: ubuntu_pkg
+  when: ansible_os_family == "Debian"
