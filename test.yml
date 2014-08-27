@@ -2,6 +2,7 @@
 - hosts: all
   vars_files:
     - 'defaults/main.yml'
+    - 'vars/main.yml'
   tasks:
     - include: 'tasks/test.yml'
     - include: 'tasks/main.yml'
