@@ -20,6 +20,15 @@ sphinx_searchd:
 sphinx_indexer:
   mem_limit: "32M"
 
-sphinx_indexes: []
+sphinx_sources:
+  - source:
+      name: "test_source"
+      type: "xmlpipe2"
+      xmlpipe_command: "cat /var/lib/sphinxsearch/test.xml"
 
-sphinx_sources: []
+sphinx_indexes:
+  - index:
+      name: "test_index"
+      source: "test_source"
+      path: "/var/lib/sphinxsearch/data/test_index"
+      charset_type: "utf-8"

@@ -17,3 +17,5 @@
     group: root
     mode: 0644
   when: sphinx_use_ext_config == False
+  notify:
+    - restart sphinx

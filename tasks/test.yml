@@ -1,0 +1,9 @@
+---
+
+- name: Create xml file for testing purpose
+  copy:
+    src: test.xml
+    dest: /var/lib/sphinxsearch/test.xml
+    owner: root
+    group: root
+    mode: 0644
