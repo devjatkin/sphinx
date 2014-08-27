@@ -24,7 +24,7 @@ sphinx_sources:
   - source:
       name: "test_source"
       type: "xmlpipe2"
-      xmlpipe_command: "cat /var/lib/sphinxsearch/test.xml"
+      xmlpipe_command: "cat /tmp/test.xml"
 
 sphinx_indexes:
   - index:
