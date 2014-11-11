@@ -19,3 +19,6 @@
   when: sphinx_use_ext_config == False
   notify:
     - restart sphinx
+
+- include: ext_config.yml
+  when: sphinx_use_ext_config == True
