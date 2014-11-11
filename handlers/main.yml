@@ -5,5 +5,5 @@
   sudo: yes
 
 - name: reload sphinx
-  service: name=sphinxseearch state=reloaded
+  service: name=sphinxsearch state=reloaded
   sudo: yes
