@@ -6,3 +6,5 @@
 
 - name: Be sure sphinxsearch is running and enabled
   service: name=sphinxsearch state=running enabled=yes
+  tags:
+    - test
