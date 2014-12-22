@@ -2,8 +2,9 @@
 
 - name: restart sphinx
   service: name=sphinxsearch state=restarted
-  sudo: yes
 
 - name: reload sphinx
   service: name=sphinxsearch state=reloaded
-  sudo: yes
+
+- name: rotate all indexes
+  command: /usr/bin/indexer --rotate --all

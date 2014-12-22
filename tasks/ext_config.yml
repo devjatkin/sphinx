@@ -41,6 +41,8 @@
     owner: root
     group: root
     mode: 0644
+  notify:
+    - rotate all indexes
 
 - name: Create configuration script as sphinx.conf
   template:
