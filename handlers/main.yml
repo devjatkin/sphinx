@@ -1,10 +1,10 @@
 ---
 
+- name: rotate all indexes
+  command: /usr/bin/indexer --rotate --all
+
 - name: restart sphinx
   service: name=sphinxsearch state=restarted
 
 - name: reload sphinx
   service: name=sphinxsearch state=reloaded
-
-- name: rotate all indexes
-  command: /usr/bin/indexer --rotate --all
