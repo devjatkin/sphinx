@@ -6,7 +6,7 @@ before_install:
  - sudo apt-get install -qq python-apt python-pycurl
 install:
   - pip install ansible
-  - ansible-galaxy install devjatkin.sphinx
+  - sudo ansible-galaxy install devjatkin.sphinx
 script:
   - echo localhost > inventory
   # Check the role/playbook's syntax
