@@ -10,6 +10,8 @@ script:
   - echo localhost > inventory
   # Check the role/playbook's syntax
   - ansible-playbook --syntax-check -i inventory test.yml
+  # Check the install/playbook's syntax
+  - ansible-playbook --syntax-check -i inventory install.yml
   # Run the role/playbook with ansible-playbook
   - ansible-playbook -i inventory test.yml --connection=local --sudo
   # Run the role/playbook again, checking to make sure it's idempotent
