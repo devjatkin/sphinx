@@ -1,0 +1,16 @@
+---
+# This playbook can be used for local sphinx installation.
+# You should install ansible for ability to run this script
+# sudo apt-get install software-properties-common
+# sudo apt-add-repository ppa:ansible/ansible
+# sudo apt-get update
+# sudo apt-get install ansible
+# sudo apt-get install python-mysqldb
+# ansible-galaxy install devjatkin.sphinx
+# For installing sphinx locally, please run command
+# ansible-playbook install.yml
+- hosts: localhost
+  connection: local
+
+  roles:
+    - devjatkin.sphinx
