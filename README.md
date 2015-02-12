@@ -11,3 +11,12 @@ This role requires Ansible 1.4 or higher and platform requirements are listed in
 ##### Platforms
 
 Developed and tested only on Ubuntu Trusty. Tested on Debian Wheezy.
+
+How to install this role only for local environment
+=====
+
+For installing sphinx locally, please run command
+```sh
+ansible-playbook install.yml
+```
+within current repo root directory.
