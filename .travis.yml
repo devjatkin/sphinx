@@ -3,18 +3,23 @@ language: python
 python: "2.7"
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq python-apt python-pycurl
+ - sudo apt-get install software-properties-common
+ - sudo apt-add-repository -y ppa:ansible/ansible
+ - sudo apt-get update -qq
+ - sudo apt-get install ansible
 install:
-  - pip install ansible==1.5.0
+  - sudo ansible-galaxy install devjatkin.sphinx
 script:
   - echo localhost > inventory
   # Check the role/playbook's syntax
-  - ansible-playbook --syntax-check -i inventory test.yml
+  - sudo ansible-playbook --syntax-check -i inventory test.yml --connection=local --sudo
+  # Check the install/playbook's syntax
+  - sudo ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
   # Run the role/playbook with ansible-playbook
-  - ansible-playbook -i inventory test.yml --connection=local --sudo
+  - sudo ansible-playbook -i inventory test.yml --connection=local --sudo
   # Run the role/playbook again, checking to make sure it's idempotent
   - >
-    ansible-playbook -i inventory test.yml --connection=local --sudo
+    sudo ansible-playbook -i inventory test.yml --connection=local --sudo
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
