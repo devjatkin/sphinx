@@ -1,25 +1,31 @@
 ---
 language: python
 python: "2.7"
+
+sudo: required
+
 before_install:
- - sudo apt-get update -qq
- - sudo apt-get install software-properties-common
- - sudo apt-add-repository -y ppa:ansible/ansible
- - sudo apt-get update -qq
- - sudo apt-get install ansible
+  - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo apt-get update -qq
+  - sudo apt-get install ansible
+
 install:
   - sudo ansible-galaxy install devjatkin.sphinx
+  - sudo gem install busser --no-ri --no-rdoc
+  - sudo busser plugin install busser-bats
+
 script:
   - echo localhost > inventory
-  # Check the role/playbook's syntax
-  - sudo ansible-playbook --syntax-check -i inventory test.yml --connection=local --sudo
   # Check the install/playbook's syntax
   - sudo ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
   # Run the role/playbook with ansible-playbook
-  - sudo ansible-playbook -i inventory test.yml --connection=local --sudo
+  - sudo ansible-playbook -i inventory install.yml --connection=local --sudo
   # Run the role/playbook again, checking to make sure it's idempotent
   - >
-    sudo ansible-playbook -i inventory test.yml --connection=local --sudo
+    sudo ansible-playbook -i inventory install.yml --connection=local --sudo
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
+
+  # Run the Test Kitchen tests.
+  - sudo /opt/busser/vendor/bats/bin/bats ./test/integration/default/bats/*.bats
