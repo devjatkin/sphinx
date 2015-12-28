@@ -5,6 +5,8 @@ python: "2.7"
 sudo: required
 dist: trusty
 
+bundler_args: --retry 3
+
 before_install:
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update -qq
@@ -12,7 +14,7 @@ before_install:
 
 install:
   - sudo ansible-galaxy install devjatkin.sphinx
-  - sudo gem install busser --no-ri --no-rdoc
+  - sudo gem install busser --no-ri --no-rdoc --source http://rubygems.org
   - sudo busser plugin install busser-bats
 
 script:
