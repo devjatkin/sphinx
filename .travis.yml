@@ -35,5 +35,5 @@ script:
 
 after_script:
   - sudo ls -la /tmp
-  - sudo cat /var/log/sphinxsearch/searchd.log
   - search another
+  - sudo cat /var/log/sphinxsearch/*.log
