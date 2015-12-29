@@ -1,0 +1,23 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  hosts: test-kitchen
+  name: ansible_playbook
+  require_chef_for_busser: false
+  require_ruby_for_busser: true
+  require_ansible_omnibus: true
+  ansible_verbosity: 2
+  ansible_verbose: true
+
+platforms:
+  - name: ubuntu-14.04
+  - name: debian-7.8
+
+suites:
+  - name: default
+
+# Fix for: https://github.com/neillturner/kitchen-ansible/issues/66
+verifier:
+  ruby_bindir: '/usr/bin'
