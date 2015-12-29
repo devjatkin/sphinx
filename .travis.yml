@@ -32,3 +32,7 @@ script:
 
   # Run the Test Kitchen tests.
   - sudo /opt/busser/vendor/bats/bin/bats ./test/integration/default/bats/*.bats
+
+after_script:
+  - sudo ls -la /tmp
+  - sudo cat /var/log/sphinxsearch/searchd.log
