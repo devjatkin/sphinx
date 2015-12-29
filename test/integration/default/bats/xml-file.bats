@@ -9,12 +9,12 @@ setup() {
   indexer --rotate --all
 }
 
-@test "Search keyword another" {
-  hits=`search another | grep hits | awk '{print $5}'`
-  [ "$hits" -gt 0 ]
-}
-
-@test "Search keyword notanother" {
+@test "Search non-existen keyword notanother" {
   hits=`search notanother | grep hits | awk '{print $5}'`
   [ "$hits" -eq 0 ]
+}
+
+@test "Search existen keyword another" {
+  hits=`search another | grep hits | awk '{print $5}'`
+  [ "$hits" -gt 0 ]
 }
