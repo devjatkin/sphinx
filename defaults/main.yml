@@ -1,5 +1,6 @@
 ---
 
+sphinx_test: False
 sphinx_use_ext_config: True
 sphinx_config_dir: "/etc/sphinxsearch"
 

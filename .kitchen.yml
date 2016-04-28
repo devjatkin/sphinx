@@ -10,10 +10,13 @@ provisioner:
   require_ansible_omnibus: true
   ansible_verbosity: 2
   ansible_verbose: true
+  extra_vars:
+    sphinx_test: true
 
 platforms:
   - name: ubuntu-14.04
-  - name: debian-7.8
+  - name: debian-7.9
+  - name: debian-8.3
 
 suites:
   - name: default
