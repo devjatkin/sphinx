@@ -1,5 +1,9 @@
 ---
 
+- name: Add backports repository for Jessie release
+  apt_repository: repo="deb http://ftp.debian.org/debian jessie-backports main" state=present
+  when: ansible_os_family == "Debian" and ansible_distribution_release == "jessie"
+
 - name: Install the sphinx package
   apt: name={{ item }} state=present update_cache=yes
   with_items: "{{ ubuntu_pkg }}"

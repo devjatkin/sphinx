@@ -22,10 +22,10 @@ script:
   # Check the install/playbook's syntax
   - sudo ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
   # Run the role/playbook with ansible-playbook
-  - sudo ansible-playbook -i inventory install.yml --connection=local --sudo
+  - sudo ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
   # Run the role/playbook again, checking to make sure it's idempotent
   - >
-    sudo ansible-playbook -i inventory install.yml --connection=local --sudo
+    sudo ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)

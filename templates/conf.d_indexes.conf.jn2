@@ -1,3 +1,4 @@
+{% if sphinx_indexes %}
 {% for item in sphinx_indexes %}
 index {{ item.index.name }}
 {
@@ -8,3 +9,4 @@ index {{ item.index.name }}
 {% endfor %}
 }
 {% endfor %}
+{% endif %}

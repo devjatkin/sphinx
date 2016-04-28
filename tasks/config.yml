@@ -1,13 +1,10 @@
 ---
 
 - name: Update defaults option for sphinx
-  template:
-    src: sphinxsearch.default.jn2
-    dest: /etc/default/sphinxsearch
-    owner: root
-    group: root
-    mode: 0644
+  lineinfile: dest=/etc/default/sphinxsearch regexp="START=(no|yes)" line="START=yes"
   when: ansible_os_family == "Debian"
+  notify:
+    - restart sphinx
 
 - name: Create flat configuration file
   template:

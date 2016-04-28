@@ -2,6 +2,9 @@
 
 - include: package.yml
 
+- include: test.yml
+  when: sphinx_test
+
 - include: config.yml
 
 - name: Be sure sphinxsearch is running and enabled
