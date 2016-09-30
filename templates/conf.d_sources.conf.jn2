@@ -3,8 +3,12 @@
 source {{ item.source.name }}
 {
 {% for k,v in item.source.iteritems() %}
-{% if k != 'name' %}
+{% if k != 'name' and v is string %}
   {{ k }} = {{ v }}
+{% elif v is iterable and v is not string %}
+{% for item in v %}
+  {{ k }} = {{ item }}
+{% endfor %}
 {% endif %}
 {% endfor %}
 }
