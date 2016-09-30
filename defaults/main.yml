@@ -26,6 +26,8 @@ sphinx_sources:
       name: "test_source"
       type: "xmlpipe2"
       xmlpipe_command: "cat /tmp/test.xml"
+      sql_attr_timestamp: [ param1, param2 ]
+      sql_attr_float: [ param3, param4 ]
 
 sphinx_indexes:
   - index:
