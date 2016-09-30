@@ -10,29 +10,29 @@ bundler_args: --retry 3
 before_install:
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update -qq
-  - sudo apt-get install -y ansible ruby
+  - sudo apt-get install -y ansible git
 
 install:
   - sudo ansible-galaxy install devjatkin.sphinx
-  - sudo gem install busser --no-ri --no-rdoc --source http://rubygems.org
-  - whereis busser
-  - sudo /usr/local/bin/busser plugin install busser-bats
+  - git clone https://github.com/sstephenson/bats.git
+  - cd bats
+  - sudo ./install.sh /usr/local
 
 script:
   - echo localhost > inventory
   # Check the install/playbook's syntax
-  - sudo ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
+  - ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
   # Run the role/playbook with ansible-playbook
-  - sudo ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
+  - ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
   # Run the role/playbook again, checking to make sure it's idempotent
   - >
-    sudo ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
+    ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 
   # Run the Test Kitchen tests.
-  - sudo /opt/busser/vendor/bats/bin/bats ./test/integration/default/bats/*.bats
+  - sudo /usr/local/bin/bats ./test/integration/default/bats/*.bats
 
 after_script:
   - sudo ls -la /tmp
