@@ -15,7 +15,8 @@ before_install:
 install:
   - sudo ansible-galaxy install devjatkin.sphinx
   - sudo gem install busser --no-ri --no-rdoc --source http://rubygems.org
-  - sudo busser plugin install busser-bats
+  - whereis busser
+  - sudo /usr/local/bin/busser plugin install busser-bats
 
 script:
   - echo localhost > inventory
