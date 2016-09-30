@@ -13,20 +13,18 @@ before_install:
   - sudo apt-get install -y ansible git
 
 install:
-  - sudo ansible-galaxy install devjatkin.sphinx
   - git clone https://github.com/sstephenson/bats.git
-  - cd bats
-  - sudo ./install.sh /usr/local
+  - sudo .bats/install.sh /usr/local
 
 script:
   - echo localhost > inventory
   # Check the install/playbook's syntax
-  - ansible-playbook --syntax-check -i inventory install.yml --connection=local --sudo
+  - sudo ansible-playbook --syntax-check -i inventory install.yml --connection=local
   # Run the role/playbook with ansible-playbook
-  - ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
+  - sudo ansible-playbook -i inventory install.yml --connection=local --extra-vars 'sphinx_test=true'
   # Run the role/playbook again, checking to make sure it's idempotent
   - >
-    ansible-playbook -i inventory install.yml --connection=local --sudo --extra-vars 'sphinx_test=true'
+    sudo ansible-playbook -i inventory install.yml --connection=local --extra-vars 'sphinx_test=true'
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
