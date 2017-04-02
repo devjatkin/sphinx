@@ -8,15 +8,17 @@ provisioner:
   require_chef_for_busser: false
   require_ruby_for_busser: true
   require_ansible_omnibus: true
-  ansible_verbosity: 2
+  ansible_verbosity: 3
   ansible_verbose: true
+# Fix for: https://github.com/ansible/ansible/issues/23016
+  ansible_version: 2.2.0
   extra_vars:
     sphinx_test: true
 
 platforms:
-  - name: ubuntu-14.04
-  - name: debian-7.9
-  - name: debian-8.3
+  - name: ubuntu-16.04
+  - name: debian-7.11
+  - name: debian-8.7
 
 suites:
   - name: default
