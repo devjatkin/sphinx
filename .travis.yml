@@ -12,7 +12,8 @@ matrix:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y git software-properties-common python-pip
+  - sudo apt-get install -y git software-properties-common python-pip aptitude
+  - sudo aptitude install -y mysql-client-5.5
   - sudo pip install ansible==$ANSIBLE_VERSION
   - ansible --version
 
