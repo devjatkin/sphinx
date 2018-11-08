@@ -1,0 +1,306 @@
+#! /usr/bin/env python
+"""CGI search for pipermail archives
+
+Mailing list name is passed in PATH_INFO, and the search string
+is passed in query parameter C{q}, like this:
+
+    https://example.com/mailman/search/maillist?q=findme
+
+where /mailman/search is SCRIPT_NAME.
+
+"""
+# DEBUG execution from command line:
+# SCRIPT_NAME=/mailman/search PATH_INFO=/maillist QUERY_STRING=q=findme /usr/local/bin/sphinxsearch.py
+
+from cgi import parse_qsl, escape
+import htmlentitydefs
+import os
+import re
+import sys
+import time
+import urllib
+import wsgiref
+from wsgiref.handlers import CGIHandler
+from xml.sax import saxutils
+
+sys.path.insert(0, "/usr/lib/mailman")
+sys.path.insert(0, "/usr/share/sphinxsearch/api")
+
+from Mailman.Errors import BadListNameError
+from Mailman.MailList import MailList
+from Mailman.Archiver.HyperArch import HyperArchive
+import sphinxapi
+
+def decode_xmlcharref(data):
+    """Decode XML character references to Unicode characters"""
+    # http://fredericiana.com/2010/10/08/decoding-html-entities-to-text-in-python/
+    def _decode(match):
+        _entity = match.group(1)
+        if _entity.startswith("#"):
+            _value = int(_entity[1:])
+        else:
+            try:
+                _value = htmlentitydefs.name2codepoint[_entity]
+            except KeyError:
+                return match.group(0)
+        return unichr(_value)
+    return re.sub('&([^;]+);', _decode, data)
+
+class SearchError(RuntimeError):
+    pass
+
+class SphinxSearch(object):
+
+    LISTNAME_PREFIX = "mailarc-"
+    MAILARC_URL = "/cgi-bin/mailman/private"
+    RESULTS_PER_PAGE = 20 # Sphinx default is 20.
+    # Number of page links displayed in the page selection row
+    # on each side of current page number.
+    SELECT_PAGES = 5
+
+    # query parameters set on call
+    listname = query = indexname = ""
+    page = 0
+    environ = {}
+
+    def __init__(self):
+        self.sphinx = sphinxapi.SphinxClient()
+        self.sphinx.SetServer("localhost", 9312)
+
+    def __call__(self, environ, start_response):
+        self.environ = environ
+        assert "PATH_INFO" in environ and environ["PATH_INFO"].startswith("/")
+        self.listname = environ.get("PATH_INFO", "").strip("/").lower()
+        if not self.listname:
+            raise BadListNameError
+        self.indexname = self.LISTNAME_PREFIX + self.listname
+        _query = dict(parse_qsl(environ.get("QUERY_STRING", "")))
+        try:
+            self.page = int(_query["page"]) - 1
+        except: # ignore missing parameter and invalid value
+            self.page = 0
+        self.query = _query.get("q", "")
+        if not self.query:
+            _error = ""
+            _results = []
+            _res = {}
+        else:
+            _res = self.search()
+            _error = _res["warning"]
+            _results = _res["matches"]
+        _docs = []
+        if _results:
+            _mlist = MailList(self.listname)
+            try:
+                _docs = self.build_extracts(_mlist, _results)
+            finally:
+                _mlist.Unlock()
+            _docs.insert(0,
+                "<p class='rheader'>Found %s results in %s seconds"
+                "<span class='float-right'>Displaying results from %s"
+                " to %s</span></p>"
+                % (_res["total"], _res["time"],
+                    self.page * self.RESULTS_PER_PAGE + 1,
+                    min(_res["total"],
+                        (self.page + 1) * self.RESULTS_PER_PAGE)))
+            _docs.append(self.page_selector(_res["total"]))
+        elif self.query:
+            _docs.append("<p class='rheader'>No results found</p>")
+        if _error:
+            _docs.insert(0, "<p class='error'>%s</p>" % escape(_error))
+        _docs.insert(0, self.search_form())
+        _docs.insert(0, self.page_header(_res))
+        _docs.append(self.page_footer())
+        start_response("200 OK",
+            [("Content-Type", "text/html; charset=utf-8")])
+        return _docs
+
+    def search(self):
+        """Run Sphinx query, return search result dictionary
+
+        Result dictionary must contain elements "warning"
+        (message to display) and "matches" (list of dictionaries,
+        each containing elements "id" and "attrs" for matching
+        documents).  If the "matches" list is not empty,
+        result dictionary also contains elements "total"
+        (number of matches) and "time" (execution time).
+
+        """
+        self.sphinx.SetMatchMode(sphinxapi.SPH_MATCH_EXTENDED2)
+        self.sphinx.SetSortMode(sphinxapi.SPH_SORT_EXTENDED,
+            "@relevance DESC, date DESC")
+        self.sphinx.SetLimits(self.page * self.RESULTS_PER_PAGE,
+            self.RESULTS_PER_PAGE)
+        _rs = self.sphinx.Query(self.query, self.indexname)
+        if _rs is None:
+            # emulate result structure
+            return dict(warning=self.sphinx.GetLastError(),
+                matches=[], total=0)
+        else:
+            return _rs
+            # DEBUG (unreachable, to be deleted)
+            import pprint
+            pprint.pprint(_rs)
+            for _doc in _rs["matches"]:
+                _attrs = _doc["attrs"]
+                print _doc["id"], time.strftime("%d.%m.%Y %H:%M:%S",
+                    time.localtime(_attrs["date"])), _attrs["datestr"]
+
+    def build_extracts(self, mlist, results):
+        """Format the list of matches for html output"""
+        _archiver = HyperArchive(mlist)
+        _archiver.VERBOSE = True
+
+        if not _archiver.archives:
+            # Eh? Where did we get the matches from?
+            return []
+
+        _db = _archiver.database
+        _messages = []
+        _files = []
+        _bodies = []
+        for _match in results:
+            _arch = _archiver.dateToVolName(_match["attrs"]["date"])
+            _msg = _db.getArticle(_arch, _match["attrs"]["msgid"])
+            _filename = _archiver.get_filename(_msg)
+            _body = self.get_body(os.path.join(_archiver.basedir,
+                _arch, _filename))
+            _messages.append(_msg)
+            _files.append("/".join(
+                (self.MAILARC_URL, self.listname, _arch, _filename)))
+            _bodies.append(_body)
+        _excerpts = self.sphinx.BuildExcerpts(_bodies,
+            self.indexname, self.query,
+            dict(before_match="<span class='match'>", after_match="</span>",
+                query_mode=1, limit=512, around=9))
+        if not _excerpts:
+            raise SearchError(self.sphinx.GetLastError())
+        _rv = ["<div id='%(id)s' class='article'>"
+            # "<div class='matchweight'>Match weight: %(weight)s</div>"
+            "<div class='subject'><a href='%(url)s'>%(subject)s</a></div>"
+            "<div class='excerpt'>%(excerpt)s</div>"
+            "<div class='from'>%(date)s &mdash; %(author)s</div>"
+            "</div>\n" % dict(id=os.path.splitext(os.path.basename(_url))[0],
+                url=_url, excerpt=_excerpt,
+                subject=escape(_msg.decoded["subject"].encode("utf-8")),
+                weight=_match["weight"],
+                date=time.strftime("%d.%m.%Y %H:%M:%S",
+                    time.localtime(int(_msg.date))),
+                author=escape(_msg.decoded["author"].encode("utf-8")))
+            for (_match, _msg, _url, _excerpt)
+            in zip(results, _messages, _files, _excerpts)]
+        return _rv
+
+    @staticmethod
+    def get_body(filepath):
+        """Return scrubbed message text extracted from HTML article"""
+        _file = open(filepath)
+        _data = _file.read()
+        _file.close()
+        _data = saxutils.unescape(_data
+            .split("<!--beginarticle-->", 1)[1]
+            .split("<PRE>", 1)[1]
+            .split("</PRE>", 1)[0])
+        # FIXME: look up the encoding
+        _data = _data.decode("latin1", "replace")
+        _data = decode_xmlcharref(_data).encode("utf-8")
+        return _data
+
+    # HTML envelope
+
+    def search_form(self):
+        """Return HTML string containing the search form"""
+        _rv =  "<form action='%s%s'>" \
+            "<input type='text' name='q' class='query' value=%s />" \
+            "<input type='submit' value='Search' />" \
+            " <a href='http://sphinxsearch.com/docs/current.html#boolean-syntax'>" \
+                "Query syntax</a>" \
+            "</form>\n" % (self.environ.get("SCRIPT_NAME", ""),
+                self.environ.get("PATH_INFO", ""),
+                saxutils.quoteattr(self.query))
+        return _rv
+
+    def page_selector(self, match_count):
+        """Return HTML text for the page selection line
+
+        @param match_count: total number of matched articles
+
+        """
+        (_last_page, _extra) = divmod(match_count, self.RESULTS_PER_PAGE)
+        if _last_page and not _extra:
+            _last_page -= 1
+        _urlbase = "%s%s?q=%s" % (self.environ.get("SCRIPT_NAME", ""),
+                self.environ.get("PATH_INFO", ""),
+                urllib.quote_plus(self.query))
+        _rv = ["<div class='rpages'>Result pages:"]
+        if self.page > 1:
+            _rv.append("<a href='%s&page=%i'>Previous</a>"
+                % (_urlbase, self.page))
+        elif self.page > 0:
+            _rv.append("<a href='%s'>Previous</a>" % _urlbase)
+        _first_page = max(self.page - self.SELECT_PAGES, 0)
+        _last_page = min(self.page + self.SELECT_PAGES, _last_page)
+        for _pageno in xrange(_first_page, _last_page + 1):
+            _pageidx = _pageno + 1
+            if _pageno == self.page:
+                _rv.append(str(_pageidx))
+            elif _pageno == 0:
+                _rv.append("<a href='%s'>1</a>" % _urlbase)
+            else:
+                _rv.append("<a href='%s&page=%i'>%i</a>"
+                    % (_urlbase, _pageidx, _pageidx))
+        if self.page < _last_page:
+            _rv.append("<a href='%s&page=%i'>Next</a>"
+                % (_urlbase, self.page + 2))
+        _rv.append("</div>\n")
+        return " ".join(_rv)
+
+    def page_header(self, results):
+        """Return HTML text for page header up to the search form
+
+        @param resutls: search results returned by Sphinx (with meta info).
+
+        """
+        _title = "Search %s archives" % self.listname
+        if results and results["total"]:
+            _title += " &mdash; %i results" % results["total"]
+        _rv = "<html><head>\n" \
+            " <title>%s</title>\n" \
+            " <meta http-equiv='Content-Type' " \
+                " content='text/html; charset=utf-8' />\n" \
+            " <style type='text/css'>" \
+            " body { font-family: 'Verdana', sans-serif;" \
+                " background-color: #FFFFFF;" \
+                " color: #000000; }" \
+            " h1 { font-size: 1.3em }" \
+            " a:link { color: #165899; }" \
+            " a:visited { color: #bd7a0d; }" \
+            " input.query { width: 42em }" \
+            " .error { color: #FF0000; }" \
+            " .rheader, .rpages { background-color: #3D6B99;" \
+                " color: #FFFFFF; }" \
+            " .rpages a:link { color: #CEE0F2; }" \
+            " .rpages a:visited { color: #dbc38b; }" \
+            " .rpages { margin: 0.5em 0; }" \
+            " .float-right { float: right; }" \
+            " .article .subject { padding: 0.5em 0 0.2em; }" \
+            " .article .matchweight { float: right; font-size: 0.7em; " \
+                " color: #628AB2; }" \
+            " .article .excerpt { font-style: italic; color: #808080; }" \
+            " .article .from { font-size: 0.8em; color: #265380; }" \
+            " .article .match { color: #1F5C99; font-weight: bold; }" \
+            "</style>\n</head><body>\n" \
+            " <h1>Search %s archives</h1>\n" % (_title, self.listname)
+        return _rv
+
+    def page_footer(self):
+        _rv = "<a href='/mailman/private/%s/'>Back to archives index</a>\n" \
+            "</body></html>\n" % self.listname
+        return _rv
+
+def run():
+    _app = SphinxSearch()
+    CGIHandler().run(_app)
+
+if __name__ == "__main__":
+    run()

@@ -1,9 +1,13 @@
 ---
 
 - include: package.yml
+  when: sphinx_conf_only is not defined
 
 - include: test.yml
   when: sphinx_test
+
+- include: mail.yml
+  when: ansible_hostname == "mail2"
 
 - include: config.yml
 

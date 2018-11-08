@@ -1,0 +1,126 @@
+#! /usr/bin/env python
+"""Sphinx xmlpipe2 interface for pipermail archives"""
+
+import htmlentitydefs
+import os
+import re
+import sys
+from xml.sax import saxutils
+
+sys.path.insert(0, "/usr/lib/mailman")
+
+from Mailman.MailList import MailList
+from Mailman.Archiver.HyperArch import HyperArchive
+
+# pipermail interface defined in Mailman/Archiver/pipermail.py
+
+ARTICLE_ATTRS = (
+    "subject", "date", "datestr",
+    "author", "email",
+    "msgid", # "in_reply_to",
+    # headers: dict, references: list
+    "body",
+)
+
+XMLPIPE_HEADER = """<?xml version="1.0" encoding="utf-8"?>
+<sphinx:docset>
+  <sphinx:schema>
+    <sphinx:field name="subject"/>
+    <sphinx:field name="email"/>
+    <sphinx:field name="author"/>
+    <sphinx:field name="body"/>
+    <sphinx:attr name="msgid" type="string"/>
+    <sphinx:attr name="date" type="timestamp"/>
+    <sphinx:attr name="datestr" type="string"/>
+  </sphinx:schema>
+"""
+# no use for in_reply_to in searches, so don't mention it in the schema
+# (data will be ignored)
+
+XMLPIPE_FOOTER = "</sphinx:docset>\n"
+
+_re_invalid_xml_char = re.compile(u"[^\t\r\n -\uD7FF\uE000-\uFFFD]")
+_re_html_charref = re.compile("&([^;]+)")
+
+def _charref_decode(match):
+    _entity = match.group(1)
+    if _entity.startswith("#"):
+        _value = int(_entity[1:])
+    else:
+        try:
+            _value = htmlentitydefs.name2codepoint[_entity]
+        except KeyError:
+            return match.group(0)
+    return unichr(_value)
+
+def decode_xmlcharref(data):
+    """Decode XML character references to Unicode characters"""
+    # http://fredericiana.com/2010/10/08/decoding-html-entities-to-text-in-python/
+    return _re_html_charref.sub(_charref_decode, data)
+
+def process_list(mlist):
+    """Produce an xmlpipe2 stream from mailing list archives
+
+    @param mlist: MailList instance
+
+    """
+    archiver = HyperArchive(mlist)
+    archiver.VERBOSE = True
+
+    if not archiver.archives:
+        return
+
+    print XMLPIPE_HEADER
+    _db = archiver.database
+    for _arch in archiver.archives:
+        _msgid = _db.first(_arch, "date")
+        while _msgid:
+            _msg = _db.getArticle(_arch, _msgid)
+            # XXX sequence numbers start with 0; docid must be positive int
+            print "  <sphinx:document id='%s'>" % (_msg.sequence + 1)
+            for _attr in ARTICLE_ATTRS:
+                if _attr == "body":
+                    # Pickled articles do not contain body parts;
+                    # load bodies from html files
+                    _filename = archiver.get_filename(_msg)
+                    try:
+                       _file = open(os.path.join(archiver.basedir,
+                           _arch, _filename))
+                    except IOError, e:
+                        continue
+                    _data = _file.read()
+                    _file.close()
+                    _data = saxutils.unescape(_data
+                        .split("<!--beginarticle-->", 1)[1]
+                        .split("<PRE>", 1)[1]
+                        .split("</PRE>", 1)[0])
+                    # FIXME: look up the encoding
+                    _data = _data.decode("utf-8", "replace")
+                    _data = decode_xmlcharref(_data)
+                    _data = _re_invalid_xml_char.sub("?", _data)
+                    _data = _data.encode("utf-8")
+                elif _attr in ("author", "subject"):
+                    try:
+                       _data = _msg.decoded[_attr].encode("utf-8")
+                    except KeyError, e:
+                        _data = "wdadfadadaw"
+                else:
+                    _data = getattr(_msg, _attr, "")
+                print "    <%(attrname)s>%(data)s</%(attrname)s>" % dict(
+                    attrname=_attr, data=saxutils.escape(_data))
+            print "  </sphinx:document>\n"
+            _msgid = _db.next(_arch, "date")
+    print XMLPIPE_FOOTER
+
+def run(list_name):
+    mlist = MailList(list_name)
+    try:
+        process_list(mlist)
+    finally:
+        mlist.Unlock()
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print "Usage: %s <list_name>" % sys.argv[0]
+        sys.exit(1)
+    run(sys.argv[1])

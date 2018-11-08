@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+  <HEAD>
+     <title>The %(listname)s Archives</title>
+     <META NAME="robots" CONTENT="noindex,follow">
+     %(meta)s
+  </HEAD>
+  <BODY BGCOLOR="#ffffff">
+     <h1>The %(listname)s Archives </h1>
+     <p>
+      You can get <a href="%(listinfo)s">more information about this list</a>.
+     </p>
+     <form action='/mailman/search/%(listname)s'>
+       Search archived messages:
+       <input type='text' name='q' class='query' value="" />
+       <input type='submit' value='Search' />
+       <a href='http://sphinxsearch.com/docs/current.html#boolean-syntax'>
+          Query syntax
+       </a>
+     </form>
+     %(noarchive_msg)s
+     %(archive_listing_start)s
+     %(archive_listing)s
+     %(archive_listing_end)s
+     </BODY>
+     </HTML>

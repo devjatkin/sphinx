@@ -1,0 +1,15 @@
+---
+- name: Make mailman search folder
+  file: path=/var/lib/mailman/search owner=root group=www-data mode=0755 state=directory
+
+- name: Make sphinx run folder
+  file: path=/var/run/sphinxsearch owner=root group=root mode=0755 state=directory
+
+- name: Copy sphinxpipe.py
+  template: src=mail/sphinxpipe.py.j2 dest=/var/lib/mailman/search/sphinxpipe.py mode=0755
+
+- name: Copy sphinxsearch.py
+  template: src=mail/sphinxsearch.py.j2 dest=/var/lib/mailman/search/sphinxsearch.py mode=0755
+
+- name: Copy archive template
+  template: src=mail/archtocnombox_html.j2 dest=/var/lib/mailman/templates/en/archtocnombox.html
