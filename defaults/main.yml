@@ -2,21 +2,21 @@
 
 sphinx_test: False
 sphinx_use_ext_config: True
-sphinx_config_dir: "/etc/sphinxsearch"
+sphinx_config_dir: "{{ sphinx_config_dir }}"
 
 sphinx_searchd:
   listen: ["127.0.0.1:9312", "9306:mysql41"]
-  log: "/var/log/sphinxsearch/searchd.log"
-  query_log: "/var/log/sphinxsearch/query.log"
+  log: "{{ sphinx_logdir }}/searchd.log"
+  query_log: "{{ sphinx_logdir }}/query.log"
   read_timeout: 5
   max_children: 30
-  pid_file: "/var/run/sphinxsearch/searchd.pid"
+  pid_file: "{{ sphinx_rundir }}/searchd.pid"
   max_matches: 1000
   seamless_rotate: 1
   preopen_indexes: 1
   unlink_old: 1
   workers: "threads"
-  binlog_path: "/var/lib/sphinxsearch/data"
+  binlog_path: "{{ sphinx_datadir }}/data"
 
 sphinx_indexer:
   mem_limit: "32M"
@@ -33,5 +33,5 @@ sphinx_indexes:
   - index:
       name: "test_index"
       source: "test_source"
-      path: "/var/lib/sphinxsearch/data/test_index"
+      path: "{{ sphinx_datadir }}/data/test_index"
       charset_type: "utf-8"

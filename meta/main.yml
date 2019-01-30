@@ -11,6 +11,9 @@ galaxy_info:
      versions:
       - wheezy
       - jessie
+   - name: EL
+     versions:
+      - 7
   galaxy_tags:
    - database
    - system

@@ -2,3 +2,6 @@
 
 ubuntu_pkg:
   - sphinxsearch
+
+rhel_pkg:
+  - http://sphinxsearch.com/files/sphinx-2.3.2-1.rhel7.x86_64.rpm

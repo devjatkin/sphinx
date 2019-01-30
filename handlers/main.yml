@@ -4,7 +4,7 @@
   command: /usr/bin/indexer --rotate --all
 
 - name: restart sphinx
-  service: name=sphinxsearch state=restarted
+  service: name="{{ sphinx_service_name }}" state=restarted
 
 - name: reload sphinx
-  service: name=sphinxsearch state=reloaded
+  service: name="{{ sphinx_service_name }}" state=reloaded

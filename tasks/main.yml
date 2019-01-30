@@ -1,5 +1,15 @@
 ---
 
+- name: Include OS-specific variables.
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+      - "{{ ansible_distribution }}.{{ ansible_lsb.codename }}.yml"
+      - "{{ ansible_distribution }}.yml"
+      - "{{ ansible_os_family }}.yml"
+#      - "Common-default.yml"
+      paths: vars
+
 - include: package.yml
 
 - include: test.yml
@@ -7,7 +17,7 @@
 
 - include: config.yml
 
-- name: Be sure sphinxsearch is running and enabled
-  service: name=sphinxsearch state=running enabled=yes
+- name: Be sure sphinx is running and enabled
+  service: name="{{ sphinx_service_name }}" state=running enabled=yes
   tags:
     - test

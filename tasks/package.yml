@@ -8,3 +8,9 @@
   apt: name={{ item }} state=present update_cache=yes
   with_items: "{{ ubuntu_pkg }}"
   when: ansible_os_family == "Debian"
+
+- name: Install sphinx
+  yum:
+    name: "{{ rhel_pkg }}"
+    state: present
+  when: ansible_os_family == "RedHat"
