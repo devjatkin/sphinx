@@ -6,13 +6,6 @@
   notify:
     - restart sphinx
 
-- name: Enable sphinx systemd service
-  systemd:
-    name: "{{ sphinx_service_name }}"
-    enabled: yes
-    state: started
-  when: ansible_os_family == "RedHat"
-
 - name: Create flat configuration file
   template:
     src: sphinx.conf.jn2
