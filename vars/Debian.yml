@@ -1,0 +1,7 @@
+---
+
+sphinx_service_name: "sphinxsearch"
+sphinx_config_dir: "/etc/sphinxsearch"
+sphinx_logdir: "/var/log/sphinxsearch"
+sphinx_rundir: "/var/run/sphinxsearch"
+sphinx_datadir: "/var/lib/sphinxsearch"

@@ -1,5 +1,15 @@
 ---
 
+- name: Include version-specific variables for CentOS/RHEL
+  include_vars: "RedHat.yml"
+  when: ansible_distribution == 'CentOS' or
+        ansible_distribution == 'Red Hat Enterprise Linux' or
+        ansible_distribution == 'RedHat'
+
+- name: Include version-specific variables for Debian
+  include_vars: "Debian.yml"
+  when: ansible_os_family == 'Debian'
+
 - include: package.yml
 
 - include: test.yml
@@ -7,7 +17,7 @@
 
 - include: config.yml
 
-- name: Be sure sphinxsearch is running and enabled
-  service: name=sphinxsearch state=running enabled=yes
+- name: Ensure sphinx is running and enabled
+  service: name="{{ sphinx_service_name }}" state=started enabled=yes
   tags:
     - test
