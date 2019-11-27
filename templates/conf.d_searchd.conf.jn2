@@ -3,7 +3,7 @@ searchd
 {% for a in sphinx_searchd.listen %}
   listen = {{a}}
 {% endfor %}
-{% for k,v in sphinx_searchd.iteritems() %}
+{% for k,v in sphinx_searchd.items() %}
 {% if k != 'listen' %}
   {{ k }} = {{ v }}
 {% endif %}
