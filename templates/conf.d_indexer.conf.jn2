@@ -1,6 +1,6 @@
 indexer
 {
-{% for k,v in sphinx_indexer.iteritems() %}
+{% for k,v in sphinx_indexer.items() %}
   {{ k }} = {{ v }}
 {% endfor %}
 }

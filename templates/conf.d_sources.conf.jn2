@@ -2,7 +2,7 @@
 {% for item in sphinx_sources %}
 source {{ item.source.name }}
 {
-{% for k,v in item.source.iteritems() %}
+{% for k,v in item.source.items() %}
 {% if k != 'name' and v is string %}
   {{ k }} = {{ v }}
 {% elif v is iterable and v is not string %}

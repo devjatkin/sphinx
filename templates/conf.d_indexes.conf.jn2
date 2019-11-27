@@ -2,7 +2,7 @@
 {% for item in sphinx_indexes %}
 index {{ item.index.name }}
 {
-{% for k,v in item.index.iteritems() %}
+{% for k,v in item.index.items() %}
 {% if k != 'name' %}
   {{ k }} = {{ v }}
 {% endif %}
