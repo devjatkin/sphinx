@@ -3,17 +3,17 @@ language: generic
 python: "2.7"
 
 sudo: required
-dist: trusty
+dist: xenial
 
 matrix:
   include:
-    - env: ANSIBLE_VERSION=1.9.6
-    - env: ANSIBLE_VERSION=2.1.2.0
+    - env: ANSIBLE_VERSION=2.8.6
+    - env: ANSIBLE_VERSION=2.9.6
 
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y git software-properties-common python-pip aptitude
-  - sudo aptitude install -y mysql-client-5.5
+  - sudo apt-get install -y mysql-client
   - sudo pip install ansible==$ANSIBLE_VERSION
   - ansible --version
 
