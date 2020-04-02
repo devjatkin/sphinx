@@ -3,8 +3,12 @@
 index {{ item.index.name }}
 {
 {% for k,v in item.index.items() %}
-{% if k != 'name' %}
+{% if k != 'name' and v is string %}
   {{ k }} = {{ v }}
+{% elif v is iterable and v is not string %}
+{% for item in v %}
+  {{ k }} = {{ item }}
+{% endfor %}
 {% endif %}
 {% endfor %}
 }
