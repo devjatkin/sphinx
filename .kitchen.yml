@@ -10,16 +10,15 @@ provisioner:
   require_ansible_omnibus: true
   ansible_verbosity: 3
   ansible_verbose: true
-# Fix for: https://github.com/ansible/ansible/issues/23016
-  ansible_version: 2.2.0
+  ansible_version: 2.8.6
   extra_vars:
     sphinx_test: true
 
 platforms:
   - name: ubuntu-16.04
   - name: ubuntu-18.04
-  - name: debian-9.12
-  - name: debian-10.3
+  - name: debian-9.11
+  - name: debian-10.2
 
 suites:
   - name: default
