@@ -1,10 +1,12 @@
 ---
 
+- name: rotate all indexes
+  command: /usr/bin/indexer --rotate --all
+  register: rotate_result
+  failed_when: "rotate_result.rc > 0 and 'no indexes found' not in rotate_result.stdout"
+
 - name: restart sphinx
   service: name="{{ sphinx_service_name }}" state=restarted
 
 - name: reload sphinx
   service: name="{{ sphinx_service_name }}" state=reloaded
-
-- name: rotate all indexes
-  command: /usr/bin/indexer --rotate --all
