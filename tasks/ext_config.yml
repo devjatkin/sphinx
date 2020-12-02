@@ -8,7 +8,7 @@
     mode: 0755
     state: directory
   with_items:
-    "conf.d"
+    - "conf.d"
 
 - name: Create the configuration file searchd.conf
   template:

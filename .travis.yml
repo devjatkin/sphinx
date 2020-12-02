@@ -8,7 +8,7 @@ dist: bionic
 matrix:
   include:
     - env: ANSIBLE_VERSION=2.8.6
-    - env: ANSIBLE_VERSION=2.9.6
+    - env: ANSIBLE_VERSION=2.10.2
 
 before_install:
   - sudo apt-get update -qq

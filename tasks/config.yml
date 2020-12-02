@@ -20,10 +20,10 @@
     owner: root
     group: root
     mode: 0644
-  when: sphinx_use_ext_config == False
+  when: ! sphinx_use_ext_config
   notify:
     - rotate all indexes
     - restart sphinx
 
 - include: ext_config.yml
-  when: sphinx_use_ext_config == True
+  when: sphinx_use_ext_config
