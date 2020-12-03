@@ -5,10 +5,7 @@
   when: ansible_os_family == "Debian"
 
 - name: Install sphinx RedHat dependencies
-  yum: name={{ item }} state=present
-  with_items:
-    - postgresql-libs
-    - unixODBC
+  yum: name="{{ rhel_dep_pkg }}" state=present
   when: ansible_os_family == "RedHat"
 
 - name: Install sphinx RedHat package
