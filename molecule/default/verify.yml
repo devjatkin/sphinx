@@ -3,8 +3,11 @@
 
 - name: Verify
   hosts: all
+  become: yes
   gather_facts: false
   tasks:
+  - name: Example assertion
+    command: /usr/local/bin/bats ./test/integration/default/bats/*.bats
   - name: Example assertion
     assert:
       that: true

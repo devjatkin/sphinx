@@ -6,3 +6,6 @@
     - name: "Include sphinx"
       include_role:
         name: "sphinx"
+#        apply:
+#          tags:
+#            - sphinx_test

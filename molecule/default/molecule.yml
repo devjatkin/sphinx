@@ -12,7 +12,7 @@ lint: |
   set -e
   yamllint *.yml
   ansible-lint
-  flake8
+#  flake8
 provisioner:
   name: ansible
 verifier:

@@ -22,7 +22,7 @@
     mode: 0644
   when: ! sphinx_use_ext_config
   notify:
-    - rotate all indexes
+    - generate all indexes
     - restart sphinx
 
 - include: ext_config.yml

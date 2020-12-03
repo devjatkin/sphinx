@@ -19,5 +19,3 @@
 
 - name: Ensure sphinx is running and enabled
   service: name="{{ sphinx_service_name }}" state=started enabled=yes
-  tags:
-    - test

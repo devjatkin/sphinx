@@ -42,7 +42,7 @@
     group: root
     mode: 0644
   notify:
-    - rotate all indexes
+    - generate all indexes
 
 - name: Create configuration script as sphinx.conf
   template:
